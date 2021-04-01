@@ -1,0 +1,68 @@
+---
+title: "Karate Club Schism"
+author: "Johannes Nakayama"
+date: "1 4 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(igraph)
+```
+
+
+
+
+
+```{r}
+
+data <- arrow::read_feather(file.path("data", "data.arrow"))
+
+```
+
+
+```{r}
+
+data %>% 
+  filter(replicate == 1 & step == 500) %>% 
+  mutate(is_stubb_cult = culture == "00000") -> subset 
+
+subset
+
+```
+
+
+```{r}
+library(igraphdata)
+library(tidygraph)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
