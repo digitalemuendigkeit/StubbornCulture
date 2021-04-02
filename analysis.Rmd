@@ -9,48 +9,161 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(igraph)
+library(ggplot2)
+library(tidyr)
 ```
 
+```{r}
+
+karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), delim = ";")
+
+```
+
+
+
+```{r}
+
+data1 <- arrow::read_feather(file.path("data", "convergence1.arrow"))
+data1 %>% 
+  select(replicate, step, culture) %>% 
+  distinct() %>% 
+  group_by(replicate, step) %>% 
+  summarize(unique_cultures = n()) %>% 
+  ungroup() -> convergence1
+
+convergence1 %>% 
+  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
+  geom_line() +
+  xlim(c(0, 100)) +
+  theme(
+    legend.position = "None"
+  )
+
+data1 %>% 
+  filter(step == max(step)) %>% 
+  select(id, culture, replicate) %>% 
+  group_by(id, culture) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(
+    names_from = culture,
+    values_from = count,
+    values_fill = 0
+  ) %>% 
+  mutate(mr_hi = `11` > `00`) %>%   
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(id, mr_hi, club_after_fission)
+
+```
+
+```{r}
+
+data2 <- arrow::read_feather(file.path("data", "convergence2.arrow"))
+data2 %>% 
+  select(replicate, step, culture) %>% 
+  distinct() %>% 
+  group_by(replicate, step) %>% 
+  summarize(unique_cultures = n()) %>% 
+  ungroup() -> convergence2
+
+convergence2 %>% 
+  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
+  geom_line() +
+  xlim(c(0, 100)) +
+  theme(
+    legend.position = "None"
+  )
+
+data2 %>% 
+  filter(step == max(step)) %>% 
+  select(id, culture, replicate) %>% 
+  group_by(id, culture) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(
+    names_from = culture,
+    values_from = count,
+    values_fill = 0
+  ) %>% 
+  mutate(mr_hi = `111` > `000`) %>% 
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(id, mr_hi, club_after_fission)
+
+```
+
+
+```{r}
+
+data3 <- arrow::read_feather(file.path("data", "convergence3.arrow"))
+data3 %>% 
+  select(replicate, step, culture) %>% 
+  distinct() %>% 
+  group_by(replicate, step) %>% 
+  summarize(unique_cultures = n()) %>% 
+  ungroup() -> convergence3
+
+convergence3 %>% 
+  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
+  geom_line() +
+  xlim(c(0, 300)) +
+  theme(
+    legend.position = "None"
+  )
+
+data3 %>% 
+  filter(step == max(step)) %>% 
+  select(id, culture, replicate) %>% 
+  group_by(id, culture) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(
+    names_from = culture,
+    values_from = count,
+    values_fill = 0
+  ) %>% 
+  mutate(mr_hi = `1111` > `0000`) %>% 
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(id, mr_hi, club_after_fission)
+
+```
 
 
 
 
 ```{r}
 
-data <- arrow::read_feather(file.path("data", "data.arrow"))
+data4 <- arrow::read_feather(file.path("data", "convergence4.arrow"))
+data4 %>% 
+  select(replicate, step, culture) %>% 
+  distinct() %>% 
+  group_by(replicate, step) %>% 
+  summarize(unique_cultures = n()) %>% 
+  ungroup() -> convergence4
+
+convergence4 %>% 
+  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
+  geom_line() +
+  xlim(c(0, 300)) +
+  theme(
+    legend.position = "None"
+  )
+
+data4 %>% 
+  filter(step == max(step)) %>% 
+  select(id, culture, replicate) %>% 
+  group_by(id, culture) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  pivot_wider(
+    names_from = culture,
+    values_from = count,
+    values_fill = 0
+  ) %>% 
+  mutate(mr_hi = `11111` > `00000`) %>%  # Yes, this 1 LOC is the classifier that reproduces Zachary PERFECTLY...
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(id, mr_hi, club_after_fission)
 
 ```
-
-
-```{r}
-
-data %>% 
-  filter(replicate == 1 & step == 500) %>% 
-  mutate(is_stubb_cult = culture == "00000") -> subset 
-
-subset
-
-```
-
-
-```{r}
-library(igraphdata)
-library(tidygraph)
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
