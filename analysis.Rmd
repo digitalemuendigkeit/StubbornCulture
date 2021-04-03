@@ -11,12 +11,7 @@ library(dplyr)
 library(igraph)
 library(ggplot2)
 library(tidyr)
-```
-
-```{r}
-
 karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), delim = ";")
-
 ```
 
 
@@ -164,6 +159,90 @@ data4 %>%
   select(id, mr_hi, club_after_fission)
 
 ```
+
+
+
+```{r}
+
+all_combs <- arrow::read_feather(file.path("data", "all_combs.arrow"))
+
+```
+
+```{r}
+
+all_combs %>% 
+  group_by(leader1, leader2, culture, replicate) %>% 
+  summarize(count = n()) %>% 
+  ungroup() %>% 
+  group_by(leader1, leader2, culture) %>% 
+  summarize(mean_count = mean(count)) %>% 
+  ungroup() %>% 
+  pivot_wider(
+    names_from = culture,
+    values_from = mean_count,
+    values_fill = 0
+  ) -> all_combs_sum_wide
+
+
+all_combs_sum_wide %<>% 
+  select(leader1, leader2, `000`, `111`) %>% 
+  mutate(l1_cult = `000` / 34, l2_cult = `111` / 34) %>% 
+  select(leader1, leader2, l1_cult, l2_cult) 
+
+all_combs_sum_wide$smaller_fraction <- with(all_combs_sum_wide, pmin(l1_cult, l2_cult))
+
+all_combs_sum_wide %>% 
+  select(leader1, leader2, smaller_fraction) %>% 
+  arrange(desc(smaller_fraction))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
