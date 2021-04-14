@@ -13,6 +13,15 @@ mutable struct AxelrodAgent <: Agents.AbstractAgent
     changed_culture::Bool
 end
 
+mutable struct Config 
+    space::Agents.GraphSpace
+    culture_dims::Int
+    trait_dims::Int
+    stubborn_positions::Dict
+    model_steps::Int
+    replicates::Int
+end
+
 function init_random_agent(id, pos, model::Agents.AgentBasedModel)
     culture = rand(0:(model.trait_dims - 1), model.culture_dims)
     return AxelrodAgent(id, pos, false, culture, false)
@@ -73,61 +82,32 @@ function create_model(space::Agents.GraphSpace, culture_dims::Int, trait_dims::I
     return model
 end
 
-
-
-# CONVERGENCE WITH TWO CULTURAL DIMENSIONS
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-model1 = create_model(space, 2, 2, Dict(0 => [34], 1 => [1]))
-adata1, _ = run!(model1, agent_step!, 500, adata = [:stubborn, :culture, :changed_culture], replicates = 100, obtainer = copy)
-adata1[!, "culture"] = [join(c) for c in adata1[!, "culture"]]
-Arrow.write(joinpath("data", "convergence1.arrow"), adata1)
-
-# CONVERGENCE WITH THREE CULTURAL DIMENSIONS
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-model2 = create_model(space, 3, 2, Dict(0 => [34], 1 => [1]))
-adata2, _ = run!(model2, agent_step!, 500, adata = [:stubborn, :culture, :changed_culture], replicates = 100, obtainer = copy)
-adata2[!, "culture"] = [join(c) for c in adata2[!, "culture"]]
-Arrow.write(joinpath("data", "convergence2.arrow"), adata2)
-
-# CONVERGENCE WITH FOUR CULTURAL DIMENSIONS
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-model3 = create_model(space, 4, 2, Dict(0 => [34], 1 => [1]))
-adata3, _ = run!(model3, agent_step!, 500, adata = [:stubborn, :culture, :changed_culture], replicates = 100, obtainer = copy)
-adata3[!, "culture"] = [join(c) for c in adata3[!, "culture"]]
-Arrow.write(joinpath("data", "convergence3.arrow"), adata3)
-
-# CONVERGENCE WITH FIVE CULTURAL DIMENSIONS
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-model4 = create_model(space, 5, 2, Dict(0 => [34], 1 => [1]))
-adata4, _ = run!(model4, agent_step!, 500, adata = [:stubborn, :culture, :changed_culture], replicates = 100, obtainer = copy)
-adata4[!, "culture"] = [join(c) for c in adata4[!, "culture"]]
-Arrow.write(joinpath("data", "convergence4.arrow"), adata4)
-
-
-
-# NEXT STEPS
-
-# use the model with 3 cultural dimensions
-# choose two agents at random and simulate the outcomes repeatedly
-# compute the probability for a schism
-
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-df_list = DataFrame[]
-@time for i in 1:33
-    for j in (i + 1):34
-        model = create_model(space, 3, 2, Dict(0 => [i], 1 => [j]))
-        adata, _ = run!(
-            model, agent_step!, 500, 
-            adata = [:stubborn, :culture, :changed_culture], 
-            replicates = 100, obtainer = copy, when = [500]
-        )
-        adata[!, "culture"] = [join(c) for c in adata[!, "culture"]]
-        adata[!, "leader1"] .= i
-        adata[!, "leader2"] .= j
-        select!(adata, Not([:step, :changed_culture]))
-        push!(df_list, deepcopy(adata))
-        print(".")
+function run_config(cfg::Config, agent_step::Function)
+    adata_list = DataFrame[]
+    for i in 1:cfg.replicates
+        model = create_model(cfg.space, cfg.culture_dims, cfg.trait_dims, cfg.stubborn_positions)
+        adata, _ = run!(model, agent_step, cfg.model_steps, 
+                        adata = [:stubborn, :culture, :changed_culture],  
+                        obtainer = copy)
+        adata[!, "replicate"] .= i
+        push!(adata_list, deepcopy(adata))
     end
+    adata = vcat(adata_list..., cols = :union)
+    adata[!, "culture"] = [join(c) for c in adata[!, "culture"]]
+    return adata
 end
-all_combs = vcat(df_list..., cols = :union)
-Arrow.write(joinpath("data", "all_combs.arrow"), all_combs)
+
+
+# CONVERGENCE WITH DIFFERENT NUMBERS OF CULTURAL DIMENSIONS
+if !("simulation_records" in readdir("data"))
+    mkdir(joinpath("data", "simulation_records"))
+end
+space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
+cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:10]
+for cfg in cfg_list
+    adata = run_config(cfg, agent_step!)
+    Arrow.write(
+        joinpath("data", "simulation_records", "config_" * lpad(string(cfg.culture_dims), 2, "0") * ".arrow"), 
+        adata
+    )
+end

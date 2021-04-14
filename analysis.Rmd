@@ -18,15 +18,49 @@ karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), d
 
 ```{r}
 
-data1 <- arrow::read_feather(file.path("data", "convergence1.arrow"))
-data1 %>% 
+data <- data_02
+predict <- function(data) {
+  outcome <- data %>% 
+    filter(step == max(step)) %>% 
+    select(id, culture, replicate) %>% 
+    group_by(id, culture) %>% 
+    summarize(count = n()) %>% 
+    ungroup() %>% 
+    pivot_wider(
+      names_from = culture,
+      names_prefix = "culture",
+      values_from = count,
+      values_fill = 0
+    ) %>% 
+    mutate(mr_hi = culture11 > culture00) %>%   
+    inner_join(karate_outcomes, by = "id") %>% 
+    select(id, mr_hi, club_after_fission)
+  outcome
+
+}
+
+accuracy <- function(){}
+
+
+
+```
+
+
+
+
+```{r}
+
+data_02 <- arrow::read_feather(file.path("data", "config_02.arrow"))
+
+# show convergence 
+data_02 %>% 
   select(replicate, step, culture) %>% 
   distinct() %>% 
   group_by(replicate, step) %>% 
   summarize(unique_cultures = n()) %>% 
-  ungroup() -> convergence1
+  ungroup() -> cfg_02
 
-convergence1 %>% 
+cfg_02 %>% 
   ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
   geom_line() +
   xlim(c(0, 100)) +
@@ -34,7 +68,8 @@ convergence1 %>%
     legend.position = "None"
   )
 
-data1 %>% 
+# show predictions
+data_02 %>% 
   filter(step == max(step)) %>% 
   select(id, culture, replicate) %>% 
   group_by(id, culture) %>% 
@@ -53,15 +88,15 @@ data1 %>%
 
 ```{r}
 
-data2 <- arrow::read_feather(file.path("data", "convergence2.arrow"))
-data2 %>% 
+data_03 <- arrow::read_feather(file.path("data", "config_03.arrow"))
+data_03 %>% 
   select(replicate, step, culture) %>% 
   distinct() %>% 
   group_by(replicate, step) %>% 
   summarize(unique_cultures = n()) %>% 
-  ungroup() -> convergence2
+  ungroup() -> cfg_03
 
-convergence2 %>% 
+cfg_03 %>% 
   ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
   geom_line() +
   xlim(c(0, 100)) +
@@ -69,7 +104,7 @@ convergence2 %>%
     legend.position = "None"
   )
 
-data2 %>% 
+data_03 %>% 
   filter(step == max(step)) %>% 
   select(id, culture, replicate) %>% 
   group_by(id, culture) %>% 
@@ -89,15 +124,15 @@ data2 %>%
 
 ```{r}
 
-data3 <- arrow::read_feather(file.path("data", "convergence3.arrow"))
-data3 %>% 
+data_04 <- arrow::read_feather(file.path("data", "config_04.arrow"))
+data_04 %>% 
   select(replicate, step, culture) %>% 
   distinct() %>% 
   group_by(replicate, step) %>% 
   summarize(unique_cultures = n()) %>% 
-  ungroup() -> convergence3
+  ungroup() -> cfg_04
 
-convergence3 %>% 
+cfg_04 %>% 
   ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
   geom_line() +
   xlim(c(0, 300)) +
@@ -105,7 +140,7 @@ convergence3 %>%
     legend.position = "None"
   )
 
-data3 %>% 
+data_04 %>% 
   filter(step == max(step)) %>% 
   select(id, culture, replicate) %>% 
   group_by(id, culture) %>% 
@@ -127,15 +162,15 @@ data3 %>%
 
 ```{r}
 
-data4 <- arrow::read_feather(file.path("data", "convergence4.arrow"))
-data4 %>% 
+data_05 <- arrow::read_feather(file.path("data", "config_05.arrow"))
+data_05 %>% 
   select(replicate, step, culture) %>% 
   distinct() %>% 
   group_by(replicate, step) %>% 
   summarize(unique_cultures = n()) %>% 
-  ungroup() -> convergence4
+  ungroup() -> cfg_05
 
-convergence4 %>% 
+cfg_05 %>% 
   ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
   geom_line() +
   xlim(c(0, 300)) +
@@ -143,7 +178,7 @@ convergence4 %>%
     legend.position = "None"
   )
 
-data4 %>% 
+data_05 %>% 
   filter(step == max(step)) %>% 
   select(id, culture, replicate) %>% 
   group_by(id, culture) %>% 
@@ -160,6 +195,8 @@ data4 %>%
 
 ```
 
+
+FordFulkerson ohne weights
 
 
 ```{r}
@@ -183,7 +220,6 @@ all_combs %>%
     values_fill = 0
   ) -> all_combs_sum_wide
 
-
 all_combs_sum_wide %<>% 
   select(leader1, leader2, `000`, `111`) %>% 
   mutate(l1_cult = `000` / 34, l2_cult = `111` / 34) %>% 
@@ -193,12 +229,17 @@ all_combs_sum_wide$smaller_fraction <- with(all_combs_sum_wide, pmin(l1_cult, l2
 
 all_combs_sum_wide %>% 
   select(leader1, leader2, smaller_fraction) %>% 
-  arrange(desc(smaller_fraction))
+  arrange(leader1, leader2)
 
 ```
 
 
 
+```{r}
+
+all_combs
+
+```
 
 
 
