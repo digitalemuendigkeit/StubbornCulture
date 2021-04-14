@@ -29,4 +29,12 @@ end
 all_combs = vcat(df_list..., cols = :union)
 Arrow.write(joinpath("data", "all_combs.arrow"), all_combs)
 
-LightGraphs.smallgraph(:karate)
+
+
+
+karate = LightGraphs.smallgraph(:karate)
+
+using GraphPlot
+
+layout=(args...)->spring_layout(args...; C=20)
+gplot(karate, layout=layout)

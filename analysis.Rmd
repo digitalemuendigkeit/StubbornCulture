@@ -17,34 +17,19 @@ karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), d
 
 
 ```{r}
-
-data <- data_02
-predict <- function(data) {
-  outcome <- data %>% 
-    filter(step == max(step)) %>% 
-    select(id, culture, replicate) %>% 
-    group_by(id, culture) %>% 
-    summarize(count = n()) %>% 
-    ungroup() %>% 
-    pivot_wider(
-      names_from = culture,
-      names_prefix = "culture",
-      values_from = count,
-      values_fill = 0
-    ) %>% 
-    mutate(mr_hi = culture11 > culture00) %>%   
-    inner_join(karate_outcomes, by = "id") %>% 
-    select(id, mr_hi, club_after_fission)
-  outcome
-
-}
-
-accuracy <- function(){}
-
-
-
+data_02 <- arrow::read_feather(file.path("data", "simulation_records", "config_02.arrow"))
+outcomes_02 <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcome_config_02.arrow")) 
 ```
 
+```{r}
+
+outcomes_02 %>% 
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(id, tendency, club_after_fission, association_strength)
+  
+  
+
+```
 
 
 
