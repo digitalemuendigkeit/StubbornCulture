@@ -21,7 +21,7 @@ for f in filenames
 
     outcome_sum = groupby(outcome, [:id, :culture])
     outcome_sum = combine(outcome_sum, nrow)
-    outcome_sum = unstack(outcome_sum, :id, :culture, :nrow)
+    outcome_sum = unstack(outcome_sum, :id, :culture, :nrow)  # TODO: insert culture dimensions here (as second id column)
     outcome_sum = coalesce.(outcome_sum, 0)
     select!(outcome_sum, new_colnames...)
     outcome_sum[!, :tendency] = (outcome_sum[!, 2] .- outcome_sum[!, 3]) ./ maxrep

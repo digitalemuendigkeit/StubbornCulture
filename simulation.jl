@@ -11,6 +11,7 @@ mutable struct AxelrodAgent <: Agents.AbstractAgent
     stubborn::Bool
     culture::AbstractArray
     changed_culture::Bool
+    culture_dims::Int
 end
 
 mutable struct Config 
@@ -24,7 +25,7 @@ end
 
 function init_random_agent(id, pos, model::Agents.AgentBasedModel)
     culture = rand(0:(model.trait_dims - 1), model.culture_dims)
-    return AxelrodAgent(id, pos, false, culture, false)
+    return AxelrodAgent(id, pos, false, culture, false, model.culture_dims)
 end
 
 function to_stubborn!(positions::Array{Int}, model::Agents.AgentBasedModel, value::Int64=0)
@@ -87,7 +88,7 @@ function run_config(cfg::Config, agent_step::Function; when=true)
     for i in 1:cfg.replicates
         model = create_model(cfg.space, cfg.culture_dims, cfg.trait_dims, cfg.stubborn_positions)
         adata, _ = run!(model, agent_step, cfg.model_steps, 
-                        adata = [:stubborn, :culture, :changed_culture],  
+                        adata = [:stubborn, :culture, :changed_culture, :culture_dims],  
                         obtainer = copy,
                         when = when)
         adata[!, "replicate"] .= i

@@ -30,11 +30,13 @@ outcomes_full %>%
   mutate(mean_tendency = mean(tendency),
          median_tendency = median(tendency)) %>% 
   ungroup() %>% 
-  arrange(median_tendency) %>% 
+  arrange(desc(mean_tendency)) %>% 
   ggplot(aes(x = fct_inorder(id), y = tendency, color = config)) +
+  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dashed") +
   geom_point(alpha = 0.3) +
   scale_color_viridis_d() +
   labs(x = "ID", y = "Outcome") +
+  coord_flip() +
   theme_bw() +
   theme(legend.position = "None")
 
@@ -43,17 +45,44 @@ outcomes_full %>%
 
 
 
+
 ```{r}
 
-outcomes_full %>% 
-  ggplot(aes(x = id, y = tendency)) +
-  geom_point()
+classical_model <- arrow::read_feather(file.path("data", "classical_model", "classical_model.arrow"))
 
 ```
 
 
+```{r}
+
+# example replicate
+classical_model %>% 
+  filter(replicate == 6) %>% 
+  ggplot(aes(x = step, y = opinion, color = factor(id))) +
+  geom_line() +
+  ylim(c(-1, 1)) +
+  theme_bw() +
+  theme(legend.position = "None")
+
+# consensus in all runs
+classical_model %>% 
+  filter(step == max(step)) %>% 
+  select(-step) %>% 
+  group_by(replicate) %>% 
+  summarize(mean_opinion = mean(opinion),
+            var_opinion = round(var(opinion), 3)) %>%
+  ungroup() -> tmp 
+
+max(tmp$var_opinion)
+
+tmp %>% 
+  ggplot(aes(x = replicate, y = mean_opinion)) +
+  geom_point() +
+  ylim(c(-1, 1)) +
+  theme_bw()
 
 
+```
 
 
 
