@@ -11,155 +11,32 @@ library(dplyr)
 library(igraph)
 library(ggplot2)
 library(tidyr)
+library(forcats)
 karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), delim = ";")
 ```
 
 
 
 ```{r}
-data_02 <- arrow::read_feather(file.path("data", "simulation_records", "config_02.arrow"))
-outcomes_02 <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcome_config_02.arrow")) 
+outcomes_full <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcomes_full.arrow"))
 ```
 
 ```{r}
 
-outcomes_02 %>% 
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(id, tendency, club_after_fission, association_strength)
-  
-  
-
-```
-
-```{r}
-data_100 <- arrow::read_feather(file.path("data", "simulation_records", "config_100.arrow"))
-outcomes_100 <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcome_config_100.arrow")) 
-```
-
-```{r}
-
-outcomes_100 %>% 
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(-association_strength, -faction)
-  
-  
-
-```
-
-
-
-
-
-
-
-
-
-```{r}
-
-data_02 <- arrow::read_feather(file.path("data", "config_02.arrow"))
-
-# show convergence 
-data_02 %>% 
-  select(replicate, step, culture) %>% 
-  distinct() %>% 
-  group_by(replicate, step) %>% 
-  summarize(unique_cultures = n()) %>% 
-  ungroup() -> cfg_02
-
-cfg_02 %>% 
-  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
-  geom_line() +
-  xlim(c(0, 100)) +
-  theme(
-    legend.position = "None"
-  )
-
-# show predictions
-data_02 %>% 
-  filter(step == max(step)) %>% 
-  select(id, culture, replicate) %>% 
-  group_by(id, culture) %>% 
-  summarize(count = n()) %>% 
+outcomes_full %>% 
+  mutate(id = as.character(id),
+         config = factor(config)) %>% 
+  group_by(id) %>% 
+  mutate(mean_tendency = mean(tendency),
+         median_tendency = median(tendency)) %>% 
   ungroup() %>% 
-  pivot_wider(
-    names_from = culture,
-    values_from = count,
-    values_fill = 0
-  ) %>% 
-  mutate(mr_hi = `11` > `00`) %>%   
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(id, mr_hi, club_after_fission)
-
-```
-
-```{r}
-
-data_03 <- arrow::read_feather(file.path("data", "config_03.arrow"))
-data_03 %>% 
-  select(replicate, step, culture) %>% 
-  distinct() %>% 
-  group_by(replicate, step) %>% 
-  summarize(unique_cultures = n()) %>% 
-  ungroup() -> cfg_03
-
-cfg_03 %>% 
-  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
-  geom_line() +
-  xlim(c(0, 100)) +
-  theme(
-    legend.position = "None"
-  )
-
-data_03 %>% 
-  filter(step == max(step)) %>% 
-  select(id, culture, replicate) %>% 
-  group_by(id, culture) %>% 
-  summarize(count = n()) %>% 
-  ungroup() %>% 
-  pivot_wider(
-    names_from = culture,
-    values_from = count,
-    values_fill = 0
-  ) %>% 
-  mutate(mr_hi = `111` > `000`) %>% 
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(id, mr_hi, club_after_fission)
-
-```
-
-
-```{r}
-
-data_04 <- arrow::read_feather(file.path("data", "config_04.arrow"))
-data_04 %>% 
-  select(replicate, step, culture) %>% 
-  distinct() %>% 
-  group_by(replicate, step) %>% 
-  summarize(unique_cultures = n()) %>% 
-  ungroup() -> cfg_04
-
-cfg_04 %>% 
-  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
-  geom_line() +
-  xlim(c(0, 300)) +
-  theme(
-    legend.position = "None"
-  )
-
-data_04 %>% 
-  filter(step == max(step)) %>% 
-  select(id, culture, replicate) %>% 
-  group_by(id, culture) %>% 
-  summarize(count = n()) %>% 
-  ungroup() %>% 
-  pivot_wider(
-    names_from = culture,
-    values_from = count,
-    values_fill = 0
-  ) %>% 
-  mutate(mr_hi = `1111` > `0000`) %>% 
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(id, mr_hi, club_after_fission)
+  arrange(median_tendency) %>% 
+  ggplot(aes(x = fct_inorder(id), y = tendency, color = config)) +
+  geom_point(alpha = 0.3) +
+  scale_color_viridis_d() +
+  labs(x = "ID", y = "Outcome") +
+  theme_bw() +
+  theme(legend.position = "None")
 
 ```
 
@@ -168,88 +45,11 @@ data_04 %>%
 
 ```{r}
 
-data_05 <- arrow::read_feather(file.path("data", "config_05.arrow"))
-data_05 %>% 
-  select(replicate, step, culture) %>% 
-  distinct() %>% 
-  group_by(replicate, step) %>% 
-  summarize(unique_cultures = n()) %>% 
-  ungroup() -> cfg_05
-
-cfg_05 %>% 
-  ggplot(aes(x = step, y = unique_cultures, color = as.factor(replicate))) +
-  geom_line() +
-  xlim(c(0, 300)) +
-  theme(
-    legend.position = "None"
-  )
-
-data_05 %>% 
-  filter(step == max(step)) %>% 
-  select(id, culture, replicate) %>% 
-  group_by(id, culture) %>% 
-  summarize(count = n()) %>% 
-  ungroup() %>% 
-  pivot_wider(
-    names_from = culture,
-    values_from = count,
-    values_fill = 0
-  ) %>% 
-  mutate(mr_hi = `11111` > `00000`) %>%  # Yes, this 1 LOC is the classifier that reproduces Zachary PERFECTLY...
-  inner_join(karate_outcomes, by = "id") %>% 
-  select(id, mr_hi, club_after_fission)
+outcomes_full %>% 
+  ggplot(aes(x = id, y = tendency)) +
+  geom_point()
 
 ```
-
-
-FordFulkerson ohne weights
-
-
-```{r}
-
-all_combs <- arrow::read_feather(file.path("data", "all_combs.arrow"))
-
-```
-
-```{r}
-
-all_combs %>% 
-  group_by(leader1, leader2, culture, replicate) %>% 
-  summarize(count = n()) %>% 
-  ungroup() %>% 
-  group_by(leader1, leader2, culture) %>% 
-  summarize(mean_count = mean(count)) %>% 
-  ungroup() %>% 
-  pivot_wider(
-    names_from = culture,
-    values_from = mean_count,
-    values_fill = 0
-  ) -> all_combs_sum_wide
-
-all_combs_sum_wide %<>% 
-  select(leader1, leader2, `000`, `111`) %>% 
-  mutate(l1_cult = `000` / 34, l2_cult = `111` / 34) %>% 
-  select(leader1, leader2, l1_cult, l2_cult) 
-
-all_combs_sum_wide$smaller_fraction <- with(all_combs_sum_wide, pmin(l1_cult, l2_cult))
-
-all_combs_sum_wide %>% 
-  select(leader1, leader2, smaller_fraction) %>% 
-  arrange(leader1, leader2)
-
-```
-
-
-
-```{r}
-
-all_combs
-
-```
-
-
-
-
 
 
 
