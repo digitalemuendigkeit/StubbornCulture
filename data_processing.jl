@@ -26,10 +26,9 @@ for f in filenames
     select!(outcome_sum, new_colnames...)
     outcome_sum[!, :tendency] = (outcome_sum[!, 2] .- outcome_sum[!, 3]) ./ maxrep
     outcome_sum[!, :config] .= replace(f, r".arrow" => s"")
-    push!(df_list, deepcopy(df))
+    push!(df_list, deepcopy(outcome_sum))
     Arrow.write(joinpath("data", "simulation_outcomes", "outcome_" * f), outcome_sum)
 end
 
-full_df = vcat(df_list, cols=:union)
+full_df = vcat(df_list..., cols=:union)
 Arrow.write(joinpath("data", "simulation_outcomes", "outcomes_full.arrow"), full_df)
-

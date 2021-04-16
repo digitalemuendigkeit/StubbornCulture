@@ -104,7 +104,7 @@ if !("simulation_records" in readdir("data"))
     mkdir(joinpath("data", "simulation_records"))
 end
 space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:100]
+cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:50]
 for cfg in cfg_list
     adata = run_config(cfg, agent_step!, when=[1000])
     Arrow.write(joinpath("data", "simulation_records", "config_" * lpad(string(cfg.culture_dims), 3, "0") * ".arrow"), adata)
