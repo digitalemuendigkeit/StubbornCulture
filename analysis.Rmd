@@ -31,6 +31,27 @@ outcomes_02 %>%
 
 ```
 
+```{r}
+data_100 <- arrow::read_feather(file.path("data", "simulation_records", "config_100.arrow"))
+outcomes_100 <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcome_config_100.arrow")) 
+```
+
+```{r}
+
+outcomes_100 %>% 
+  inner_join(karate_outcomes, by = "id") %>% 
+  select(-association_strength, -faction)
+  
+  
+
+```
+
+
+
+
+
+
+
 
 
 ```{r}

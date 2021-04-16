@@ -82,13 +82,14 @@ function create_model(space::Agents.GraphSpace, culture_dims::Int, trait_dims::I
     return model
 end
 
-function run_config(cfg::Config, agent_step::Function)
+function run_config(cfg::Config, agent_step::Function; when=true)
     adata_list = DataFrame[]
     for i in 1:cfg.replicates
         model = create_model(cfg.space, cfg.culture_dims, cfg.trait_dims, cfg.stubborn_positions)
         adata, _ = run!(model, agent_step, cfg.model_steps, 
                         adata = [:stubborn, :culture, :changed_culture],  
-                        obtainer = copy)
+                        obtainer = copy,
+                        when = when)
         adata[!, "replicate"] .= i
         push!(adata_list, deepcopy(adata))
     end
@@ -98,16 +99,13 @@ function run_config(cfg::Config, agent_step::Function)
 end
 
 
-# CONVERGENCE WITH DIFFERENT NUMBERS OF CULTURAL DIMENSIONS
+# SIMULATIONS
 if !("simulation_records" in readdir("data"))
     mkdir(joinpath("data", "simulation_records"))
 end
 space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
-cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:10]
+cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:100]
 for cfg in cfg_list
-    adata = run_config(cfg, agent_step!)
-    Arrow.write(
-        joinpath("data", "simulation_records", "config_" * lpad(string(cfg.culture_dims), 2, "0") * ".arrow"), 
-        adata
-    )
+    adata = run_config(cfg, agent_step!, when=[1000])
+    Arrow.write(joinpath("data", "simulation_records", "config_" * lpad(string(cfg.culture_dims), 3, "0") * ".arrow"), adata)
 end
