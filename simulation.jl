@@ -110,3 +110,12 @@ for cfg in cfg_list
     adata = run_config(cfg, agent_step!, when=[1000])
     Arrow.write(joinpath("data", "simulation_records", "config_" * lpad(string(cfg.culture_dims), 3, "0") * ".arrow"), adata)
 end
+
+
+if !("simulation_records" in readdir("data"))
+    mkdir(joinpath("data", "simulation_records"))
+end
+space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
+cfg = Config(space, 4, 2, Dict(), 1000, 100)
+adata = run_config(cfg, agent_step!)
+Arrow.write(joinpath("data", "simulation_records", "random_config.arrow"), adata)

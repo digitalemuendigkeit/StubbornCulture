@@ -46,3 +46,6 @@ Arrow.write(joinpath("data", "classical_model", "classical_model.arrow"), classi
 
 # I converted the adjacency matrix of the karate network to a right stochastic matrix by deviding each entry by its rowsum.
 # The model converges very close to 0 in all replicates, the network structure does not seem to play a big role.
+
+
+# This model was proposed as a model of consensus finding among experts (De Groot 1974, Lehrer 1975)

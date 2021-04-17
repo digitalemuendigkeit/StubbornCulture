@@ -45,6 +45,34 @@ outcomes_full %>%
 
 
 
+```{r}
+
+random_cfg <- arrow::read_feather(file.path("data", "simulation_records", "random_config.arrow"))
+
+```
+
+
+
+```{r}
+
+random_cfg %>% 
+  filter(step == max(step)) %>% 
+  select(replicate, culture) %>% 
+  distinct() %>% 
+  group_by(replicate) %>% 
+  summarize(unique_cultures = n()) %>% 
+  ungroup() %>% 
+  group_by(unique_cultures) %>% 
+  summarize(count = n()) %>% 
+  ungroup()
+
+```
+
+
+
+
+# Benchmark 1: The Classical Model of Opinion Dynamics
+
 
 ```{r}
 
@@ -86,9 +114,26 @@ tmp %>%
 
 
 
+# Benchmark 2: The Friedkin-Johnson Model
+
+```{r}
+
+friedkin_johnson <- arrow::read_feather(file.path("data", "friedkin_johnson", "friedkin_johnson.arrow"))
+# rm(friedkin_johnson)
+```
 
 
+```{r}
 
+friedkin_johnson %>% 
+  filter(replicate == 100) %>% 
+  filter(step <= 15) %>% 
+  ggplot(aes(x = step, y = opinion, color = factor(id))) +
+  geom_line(size = 0.6) +
+  theme_bw() +
+  theme(legend.position = "None")
+
+```
 
 
 
