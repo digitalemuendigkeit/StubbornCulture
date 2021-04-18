@@ -17,6 +17,8 @@ karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), d
 
 
 
+# Axelrod Model with Adjusted Initial Conditions
+
 ```{r}
 outcomes_full <- arrow::read_feather(file.path("data", "simulation_outcomes", "outcomes_full.arrow"))
 ```
@@ -42,8 +44,10 @@ outcomes_full %>%
 
 ```
 
+CAVEAT: The order in which nodes are selected matters! The second node to be drawn has a much higher degree on average. This means that the interactions with our opinion leaders John A. and Mr. Hi are likely overrepresented. This is not necessarily a bad thing with regards to the interpretability of our model.
 
 
+# Axelrod Model with Random Configuration
 
 ```{r}
 
@@ -69,10 +73,7 @@ random_cfg %>%
 ```
 
 
-
-
-# Benchmark 1: The Classical Model of Opinion Dynamics
-
+# Classical Model of Opinion Dynamics
 
 ```{r}
 
@@ -114,7 +115,7 @@ tmp %>%
 
 
 
-# Benchmark 2: The Friedkin-Johnson Model
+# Friedkin-Johnson Model
 
 ```{r}
 
@@ -136,13 +137,68 @@ friedkin_johnson %>%
 ```
 
 
+# Hegselmann-Krause Model
+
+
+```{r}
+hegselmann_krause <- arrow::read_feather(file.path("data", "hegselmann_krause", "hegselmann_krause.arrow"))
+```
+
+
+```{r}
+hegselmann_krause %>% 
+  filter(epsilon == 0.5, replicate == 1) %>% 
+  filter(step <= 10, id == 1) %>% 
+  ggplot(aes(x = step, y = opinion, color = factor(id))) +
+  geom_line() +
+  theme(legend.position = "None")
+```
 
 
 
+```{r}
+
+hegselmann_krause %>% 
+  filter(replicate == 3) %>% 
+  filter(step <= 100) %>% 
+  ggplot(aes(x = step, y = opinion, color = factor(id))) +
+  geom_line() +
+  theme(legend.position = "None") +
+  facet_wrap(. ~ factor(epsilon))
+
+```
 
 
+```{r}
+
+hegselmann_krause %>% 
+  filter(epsilon == 0.5, replicate <= 20) %>% 
+  filter(step <= 100) %>% 
+  ggplot(aes(x = step, y = opinion, color = factor(id))) +
+  geom_line() +
+  theme(legend.position = "None") +
+  facet_wrap(. ~ factor(replicate))
+
+```
 
 
+```{r}
+
+hegselmann_krause %>% 
+  filter(step == 50) %>% 
+  filter(epsilon == 0.5) %>% 
+  group_by(id) %>% 
+  mutate(mean_tendency = mean(opinion)) %>% 
+  ungroup() %>% 
+  arrange(desc(mean_tendency)) %>% 
+  ggplot(aes(x = fct_inorder(factor(id)), y = opinion, color = factor(replicate))) +
+  geom_jitter(alpha = 0.1) +
+  coord_flip() +
+  theme_bw() +
+  theme(legend.position = "None")
+  
+
+```
 
 
 

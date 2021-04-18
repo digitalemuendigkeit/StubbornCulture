@@ -20,7 +20,6 @@ end
 
 
 # initial opinions and the susceptibility matrix
-x_0 = rand!(zeros(34)) .* 2 .- 1
 G = Diagonal(rand!(zeros(34)))
 G[1, 1] = 1.  # opinion leader 1
 G[34, 34] = 1.  # opinion leader 2
@@ -35,7 +34,7 @@ end
 # run 100 replicates
 df_list = DataFrame[]
 for rep in 1:100
-    x_0 = rand!(zeros(34)) .* 2 .-1
+    x_0 = rand!(zeros(34)) .* 2 .- 1
     x_0[1] = -1.
     x_0[34] = 1.
     outcomes = friedkin_johnson(x_0, A, G, 500)
