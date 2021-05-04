@@ -12,7 +12,10 @@ library(igraph)
 library(ggplot2)
 library(tidyr)
 library(forcats)
+library(Matrix)
+library(reshape2)
 karate_outcomes <- readr::read_delim(file.path("data", "karate_outcomes.csv"), delim = ";")
+SAVE <- FALSE
 ```
 
 
@@ -36,15 +39,48 @@ outcomes_full %>%
   ggplot(aes(x = fct_inorder(id), y = tendency, color = config)) +
   geom_hline(yintercept = 0, alpha = 0.5, linetype = "dashed") +
   geom_point(alpha = 0.3) +
+  geom_path(aes(group = config), alpha = 0.2) +
   scale_color_viridis_d() +
-  labs(x = "ID", y = "Outcome") +
+  labs(title = "Aggregate outcomes for different number of cultural dimensions", 
+       x = "Agent ID", y = "Outcome tendency") +
   coord_flip() +
   theme_bw() +
   theme(legend.position = "None")
 
+if (SAVE) {
+  ggsave(file.path("graphics", "classification_aggregate.pdf"), width = 7, height = 4.5)
+}
 ```
 
+
+
 CAVEAT: The order in which nodes are selected matters! The second node to be drawn has a much higher degree on average. This means that the interactions with our opinion leaders John A. and Mr. Hi are likely overrepresented. This is not necessarily a bad thing with regards to the interpretability of our model.
+
+
+
+```{r}
+
+mat <- readr::read_delim(file.path("data", "clustering_matrices", "config_003.txt"), delim = ",", col_names = FALSE)
+mat <- Matrix::as.matrix(mat)
+longdata <- melt(mat)
+
+longdata %>% 
+  ggplot(aes(x = Var2, y = Var1)) +
+  geom_raster(aes(fill = value)) +
+  scale_fill_viridis_c() +
+  coord_fixed()
+
+```
+
+
+
+
+
+
+
+
+
+
 
 
 # Axelrod Model with Random Configuration
@@ -71,6 +107,14 @@ random_cfg %>%
   ungroup()
 
 ```
+
+
+```{r}
+random_cfg %>% 
+  filter()
+```
+
+
 
 
 # Classical Model of Opinion Dynamics
