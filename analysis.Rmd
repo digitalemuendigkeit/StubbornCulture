@@ -127,10 +127,11 @@ friedkin_johnson <- arrow::read_feather(file.path("data", "friedkin_johnson", "f
 ```{r}
 
 friedkin_johnson %>% 
-  filter(replicate == 100) %>% 
+  # filter(replicate == 3) %>% 
   filter(step <= 15) %>% 
-  ggplot(aes(x = step, y = opinion, color = factor(id))) +
-  geom_line(size = 0.6) +
+  ggplot(aes(x = step, y = opinion, color = factor(id), group = interaction(id, replicate))) +
+  geom_line(size = 0.6, alpha = 0.3) +
+  # geom_jitter() +
   theme_bw() +
   theme(legend.position = "None")
 
