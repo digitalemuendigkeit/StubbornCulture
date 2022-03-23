@@ -1,0 +1,53 @@
+---
+title: "Plot Examples"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(arrow)
+```
+
+```{r}
+random_profile <- runif(n = 50, min = 0, max = 1)
+dispersed_profile <- seq(from = 0, to = 1, length.out = 50)
+
+data.frame(
+  random = random_profile,
+  dispersed = dispersed_profile 
+) %>% 
+  pivot_longer(
+    cols = c(random, dispersed),
+    names_to = "name",
+    values_to = "value"
+  ) %>% 
+  ggplot(aes(x = value, y = as.factor(name))) + 
+  geom_point(size = 2, alpha = 0.5, shape = 21, color = "black") +
+  labs(
+    x = "Opinion",
+    y = "Distribution"
+  ) +
+  theme(
+    panel.background = element_rect(fill = "white"),
+    axis.line = element_line(color = "darkgrey"),
+    axis.ticks = element_line(color = "darkgrey")
+  )
+
+# ggsave("example-opinion-profiles.pdf", width = 8, height = 3)
+```
+
+
+```{r}
+data <- arrow::read_feather(file.path("data", "hegselmann_krause", "hegselmann_krause.arrow"))
+
+data %>% 
+  filter(replicate == 5, epsilon == 1.0) %>% 
+  mutate(id = as.factor(id)) %>% 
+  ggplot(aes(x = step, y = opinion, group = id)) +
+  geom_line() +
+  scale_x_continuous(limits = c(0, 20))
+```
+

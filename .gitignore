@@ -2,8 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-/data/
 /graphics/
-*.arrow
-*.csv
 *.pdf
