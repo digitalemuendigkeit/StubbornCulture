@@ -1,5 +1,5 @@
-using LightGraphs
-using LightGraphs.LinAlg
+using Graphs
+using Graphs.LinAlg
 using Random
 using DataFrames
 using Arrow
@@ -25,7 +25,7 @@ G[1, 1] = 1.  # opinion leader 1
 G[34, 34] = 1.  # opinion leader 2
 
 # construct update matrix for the karate network
-karate = LightGraphs.smallgraph(:karate)
+karate = Graphs.smallgraph(:karate)
 A = Float64.(Matrix(adjacency_matrix(karate)))
 for i in 1:34
     A[i, :] = A[i, :] ./ sum(A[i, :]) 
@@ -44,10 +44,10 @@ end
 friedkin_johnson_outcomes = vcat(df_list..., cols = :union)
 
 
-if !("friedkin_johnson" in readdir("data"))
-    mkdir(joinpath("data", "friedkin_johnson"))
-end
-Arrow.write(joinpath("data", "friedkin_johnson", "friedkin_johnson.arrow"), friedkin_johnson_outcomes)
+# if !("friedkin_johnson" in readdir("data"))
+#     mkdir(joinpath("data", "friedkin_johnson"))
+# end
+# Arrow.write(joinpath("data", "friedkin_johnson", "friedkin_johnson.arrow"), friedkin_johnson_outcomes)
 
 
 # The Friedkin-Johnson model factors in "stubbornness" (given by the matrix G)

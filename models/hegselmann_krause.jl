@@ -51,7 +51,7 @@ for ϵ in 0.1:0.1:1.0
     end
 end
 hegselmann_krause_outcomes = vcat(df_list..., cols = :union)
-if !("hegselmann_krause" in readdir("data"))
-    mkdir(joinpath("data", "hegselmann_krause"))
-end
-Arrow.write(joinpath("data", "hegselmann_krause", "hegselmann_krause.arrow"), hegselmann_krause_outcomes)
+# if !("hegselmann_krause" in readdir("data"))
+#     mkdir(joinpath("data", "hegselmann_krause"))
+# end
+# Arrow.write(joinpath("data", "hegselmann_krause", "hegselmann_krause.arrow"), hegselmann_krause_outcomes)

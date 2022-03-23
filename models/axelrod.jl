@@ -3,7 +3,7 @@ using StatsBase
 using DataFrames
 using Arrow
 using Random
-using LightGraphs
+using Graphs
 
 mutable struct AxelrodAgent <: Agents.AbstractAgent
     id::Int
@@ -14,7 +14,7 @@ mutable struct AxelrodAgent <: Agents.AbstractAgent
     culture_dims::Int
 end
 
-mutable struct Config 
+mutable struct Config
     space::Agents.GraphSpace
     culture_dims::Int
     trait_dims::Int
@@ -46,7 +46,7 @@ function to_stubborn!(positions::Dict, model::Agents.AgentBasedModel)
 end
 
 function agent_step!(agent::Agents.AbstractAgent, model::Agents.AgentBasedModel)
-    neighbors = Agents.node_neighbors(agent, model)
+    neighbors = Agents.nearby_ids(agent, model, r=1)
     interaction_partner_pos = StatsBase.sample(neighbors)
     interaction_partner = first(collect(Agents.agents_in_position(interaction_partner_pos, model)))
     similarity = StatsBase.mean(agent.culture .== interaction_partner.culture)
@@ -101,10 +101,10 @@ end
 
 
 # SIMULATIONS
-if !("simulation_records" in readdir("data"))
-    mkdir(joinpath("data", "simulation_records"))
-end
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
+# if !("simulation_records" in readdir("data"))
+#     mkdir(joinpath("data", "simulation_records"))
+# end
+space = Agents.GraphSpace(Graphs.smallgraph(:karate))
 cfg_list = [Config(space, i, 2, Dict(0 => [34], 1 => [1]), 1000, 100) for i in 2:50]
 for cfg in cfg_list
     adata = run_config(cfg, agent_step!, when=[1000])
@@ -115,7 +115,7 @@ end
 if !("simulation_records" in readdir("data"))
     mkdir(joinpath("data", "simulation_records"))
 end
-space = Agents.GraphSpace(LightGraphs.smallgraph(:karate))
+space = Agents.GraphSpace(Graphs.smallgraph(:karate))
 cfg = Config(space, 4, 2, Dict(), 1000, 100)
 adata = run_config(cfg, agent_step!)
-Arrow.write(joinpath("data", "simulation_records", "random_config.arrow"), adata)
+# Arrow.write(joinpath("data", "simulation_records", "random_config.arrow"), adata)

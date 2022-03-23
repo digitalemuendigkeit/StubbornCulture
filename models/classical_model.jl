@@ -1,5 +1,5 @@
-using LightGraphs
-using LightGraphs.LinAlg
+using Graphs
+using Graphs.LinAlg
 using Random
 using DataFrames
 using Arrow
@@ -19,7 +19,7 @@ function classical_model(stochastic_matrix, initial_opinions, iterations)
 end
 
 # construct update matrix for the karate network
-karate = LightGraphs.smallgraph(:karate)
+karate = Graphs.smallgraph(:karate)
 karate_adj = Float64.(Matrix(adjacency_matrix(karate)))
 for i in 1:34
     karate_adj[i, :] = karate_adj[i, :] ./ sum(karate_adj[i, :]) 
@@ -38,10 +38,10 @@ end
 classical_model_outcomes = vcat(df_list..., cols = :union)
 
 
-if !("classical_model" in readdir("data"))
-    mkdir(joinpath("data", "classical_model"))
-end
-Arrow.write(joinpath("data", "classical_model", "classical_model.arrow"), classical_model_outcomes)
+# if !("classical_model" in readdir("data"))
+#     mkdir(joinpath("data", "classical_model"))
+# end
+# Arrow.write(joinpath("data", "classical_model", "classical_model.arrow"), classical_model_outcomes)
 
 
 # I converted the adjacency matrix of the karate network to a right stochastic matrix by deviding each entry by its rowsum.
