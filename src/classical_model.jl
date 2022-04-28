@@ -4,7 +4,6 @@ using Random
 using DataFrames
 using Arrow
 
-# TODO: add seeding everywhere
 
 function classical_model(stochastic_matrix, initial_opinions, iterations)
     opinion_states = DataFrame[]
@@ -18,12 +17,14 @@ function classical_model(stochastic_matrix, initial_opinions, iterations)
     return opinion_states
 end
 
+
 # construct update matrix for the karate network
 karate = Graphs.smallgraph(:karate)
 karate_adj = Float64.(Matrix(adjacency_matrix(karate)))
 for i in 1:34
     karate_adj[i, :] = karate_adj[i, :] ./ sum(karate_adj[i, :]) 
 end
+
 
 # run 100 replicates
 df_list = DataFrame[]
