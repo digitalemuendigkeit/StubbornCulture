@@ -4,9 +4,6 @@ using GraphRecipes
 using DataFrames
 using Random
 
-# TODO:
-# * make n_dims a parameter
-
 mutable struct AxelrodAgent
     id::Int
     culture::AbstractArray
