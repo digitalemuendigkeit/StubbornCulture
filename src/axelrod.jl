@@ -7,25 +7,20 @@ using Random
 # TODO:
 # * make n_dims a parameter
 
-N_AGENTS = 100
-
 mutable struct AxelrodAgent
-    id
-    culture
+    id::Int
+    culture::AbstractArray
 end
 
 mutable struct AxelrodModel
-    agents
-    space
+    agents::Array{AxelrodAgent}
+    space::Graphs.AbstractGraph
 end
 
-# Plot graph
-# graphplot(space, curves=false)
-
-function create_agents(n)
+function create_agents(sqrt_n; n_culture_dims=5)
     agent_set = AxelrodAgent[]
-    for i in 1:n
-        push!(agent_set, AxelrodAgent(i, rand(0:9, 5)))
+    for i in 1:(sqrt_n^2)  # make sure agent count is feasible for grid
+        push!(agent_set, AxelrodAgent(i, rand(0:9, n_culture_dims)))
     end
     return agent_set
 end
@@ -37,13 +32,13 @@ function similarity(agent1, agent2)
     )
 end
 
-function create_model(n_agents)
-    agents = create_agents(n_agents)
+function create_model(sqrt_n_agents; periodic=false, n_culture_dims=5)
+    agents = create_agents(sqrt_n_agents, n_culture_dims=n_culture_dims)
     space = Graphs.grid(
-        [Int(sqrt(n_agents)), Int(sqrt(n_agents))],
-        periodic=false
+        [Int(sqrt_n_agents), Int(sqrt_n_agents)],
+        periodic=periodic
     )
-    return(AxelrodModel(agents, space))
+    return AxelrodModel(agents, space)
 end
 
 function choose_neighbor(model, agent_id)
@@ -54,22 +49,28 @@ end
 function run!(model, n_steps)
     data = DataFrame[]
     for i in 1:n_steps
-        updated_agents = AxelrodAgent[]
+        updtd_agents = AxelrodAgent[]
         for a in model.agents
-            neigh_id = choose_neighbor(model, a.id)
-            updated_a = deepcopy(a)
-            updated_neigh = deepcopy(model.agents[neigh_id])
-            if similarity(updated_a, updated_neigh) < rand()
-                # TODO: add axelrod step
-                println("update culture")
-            else
-                println("don't update culture")
+            b_id = choose_neighbor(model, a.id)
+            updtd_a = deepcopy(a)
+            updtd_b = deepcopy(model.agents[b_id])
+            if similarity(updtd_a, updtd_b) < rand()
+                idx_arr = findall(
+                    ==(0),
+                    updtd_a.culture .== updtd_b.culture
+                )
+                dim_to_change = rand(idx_arr)
+                updtd_a.culture[dim_to_change] = updtd_b.culture[dim_to_change]
             end
-            push!(updated_agents, updated_a)
+            push!(updtd_agents, updtd_a)
         end
-        push!(data, DataFrame(deepcopy(updated_agents)))
-        model.agents = updated_agents
+        push!(data, DataFrame(deepcopy(updtd_agents)))
+        model.agents = updtd_agents
     end
     data = vcat(data...)
     return data
 end
+
+# Plot graph
+# graphplot(space, curves=false)
+
