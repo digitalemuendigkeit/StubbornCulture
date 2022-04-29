@@ -70,4 +70,3 @@ end
 
 # Plot graph
 # graphplot(space, curves=false)
-

@@ -1,7 +1,6 @@
 using DataFrames
 using Random
 
-
 mutable struct ClassicalModel
     agents::AbstractArray
     weights::Matrix{Float64}
